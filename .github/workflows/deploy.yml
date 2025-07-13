@@ -6,6 +6,8 @@ on:
   pull_request:
     branches: [ "parte-4-cicd-github-actions" ]
 
+  workflow_dispatch: # 👉 permite ejecutar manualmente
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
