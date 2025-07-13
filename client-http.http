@@ -1,0 +1,27 @@
+### GET Request to Retrieve All Persons
+GET http://localhost:8080/api/persons
+
+
+
+### POST Request to Create a New Person
+POST http://localhost:8080/api/persons
+Content-Type: application/json
+
+{
+  "firstName": "Alex",
+  "lastName": "Ray",
+  "email": "alex.ray@example.com",
+  "address": "101 Tech Ave"
+}
+
+
+
+### PUT Request to update a Exist Person
+PUT http://localhost:8080/api/persons/1
+Content-Type: application/json
+
+{
+  "firstName": "Johnathan",
+  "lastName": "Doe",
+  "address": "123 Main Street, Updated"
+}

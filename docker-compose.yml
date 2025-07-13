@@ -1,0 +1,14 @@
+services:
+  postgres_workshop:
+    image: postgres:15
+    volumes:
+      - db_postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=workshop_db
+
+volumes:
+  db_postgres:

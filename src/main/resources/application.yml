@@ -1,0 +1,63 @@
+# ===================================================================
+# CONFIGURACIÓN BASE (APLICA A TODOS LOS PERFILES)
+# ===================================================================
+spring:
+  application:
+    # Nombre de la aplicación. Útil para logging y gestión.
+    name: database-change-management-java
+
+  flyway:
+    # Habilita la ejecución de migraciones de Flyway al arrancar la aplicación.
+    enabled: true
+    # Si la tabla de historial de Flyway no existe, crea una línea base en lugar de fallar.
+    # Esencial para aplicar Flyway a una base de datos ya existente.
+    baseline-on-migrate: true
+    # Define la versión para la línea base. Las migraciones comenzarán desde este número.
+    baseline-version: 1
+    # Ubicaciones donde Flyway buscará los scripts de migración.
+    # 'classpath:' busca dentro de los recursos del proyecto (ej. src/main/resources).
+    # 'filesystem:' buscaría en el sistema de archivos local.
+    locations: [ classpath:db/migration/prod ]
+    # Deshabilita el reemplazo de placeholders (ej. ${placeholder}) en los scripts SQL.
+    placeholderReplacement: false
+
+  datasource:
+    # Configuración de la conexión a la base de datos PostgreSQL.
+    # Flyway utilizará este mismo datasource para aplicar las migraciones.
+    password: postgres
+    username: postgres
+    url: jdbc:postgresql://localhost:5432/workshop_db
+    driver-class-name: org.postgresql.Driver
+
+---
+# ===================================================================
+# PERFIL DE DESARROLLO (dev)
+# Se activa al ejecutar la aplicación con el perfil 'dev'.
+# Ejemplo: -Dspring.profiles.active=dev
+# ===================================================================
+spring:
+  config:
+    activate:
+      # Activa este bloque de configuración solo cuando el perfil 'dev' está activo.
+      on-profile: dev
+  flyway:
+    # Aunque ya está habilitado en la base, es una buena práctica ser explícito.
+    enabled: true
+    # IMPORTANTE: Sobrescribe las ubicaciones de la configuración base.
+    # En 'dev', Flyway buscará tanto en 'prod' como en 'dev'.
+    # Esto permite tener migraciones base para todos los entornos (prod)
+    # y migraciones adicionales solo para desarrollo (ej. datos de prueba).
+    locations: [ classpath:db/migration/prod, classpath:db/migration/dev ]
+  jpa:
+    hibernate:
+      # Controla cómo Hibernate interactúa con el esquema de la base de datos.
+      # 'none': No hace nada. Hibernate no interactúa con el esquema de la base de datos.
+                # Es la opción más segura cuando Flyway gestiona el esquema.
+      # 'validate': Verifica que la estructura de la base de datos coincida con las entidades (clases).
+      # 'update': Actualiza el esquema de base de datos para que coincida con las entidades (agrega, no elimina).
+      # 'create': Elimina y crea desde cero el esquema de base de datos cada vez que se inicia la app.
+      # 'create-drop': Igual que create, pero además elimina la base de datos al apagar la app.
+      # 'drop' (no estándar): Algunas versiones lo reconocen para eliminar el esquema existente sin crear otro.
+      ddl-auto: none
+    # Muestra en la consola el SQL generado por Hibernate. Útil para depuración.
+    show-sql: false
