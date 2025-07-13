@@ -16,7 +16,7 @@ usando **Flyway**, **Spring Boot**, **GitHub Actions** y un enfoque final aplica
 
 ---
 
-## Ramas del taller
+## 🌿 Ramas del taller
 
 1. `main`: proyecto base con estructura mínima (README, .gitignore, etc.).
 2. `parte-2-springboot-flyway`: configuración inicial y primeras migraciones.
