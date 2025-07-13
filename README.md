@@ -80,7 +80,7 @@ git diff parte-2-springboot-flyway parte-3-rollbacks-validaciones
 
 ## 📝 Contenido del Taller
 
-### 🔹 Parte 1 – Fundamentos de Database Change Management
+### 🔹 [Parte 1 – Fundamentos de Database Change Management](#1-crear-el-proyecto-en-spring-initializr)
 
 - Enfoques: state-based vs migration-based
 
@@ -144,20 +144,21 @@ documento.
 
 En esta sección, configuraremos nuestro proyecto y crearemos las primeras migraciones.
 
-1. **Crear el Proyecto en Spring Initializr:**
-    - Ve a [start.spring.io](https://start.spring.io/) y configura un proyecto Maven con Java 21.
-    - Añade las siguientes dependencias: `Spring Web`, `Flyway Migration`, `PostgreSQL Driver`, `Spring Data JPA`, y
-      `Lombok` (opcional, pero recomendado).
+#### 1. Crear el Proyecto en Spring Initializr:
 
-2. **Configurar la Base de Datos con Docker:**
+- Ve a [start.spring.io](https://start.spring.io/) y configura un proyecto Maven con Java 21.
+- Añade las siguientes dependencias: `Spring Web`, `Flyway Migration`, `PostgreSQL Driver`, `Spring Data JPA`, y
+  `Lombok` (opcional, pero recomendado).
 
-* Abre una terminal y ejecuta el siguiente comando para iniciar un contenedor de PostgreSQL:
+#### 2. **Configurar la Base de Datos con Docker:**
+
+- Abre una terminal y ejecuta el siguiente comando para iniciar un contenedor de PostgreSQL:
 
 ```shell
 docker run --name postgres_workshop -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=workshop_db -p 5432:5432 -d postgres:15
 ```
 
-* O ejecuta el `docker-compose.yml` si lo prefieres:
+- O ejecuta el `docker-compose.yml` si lo prefieres:
 
 ```yml
 services:
@@ -180,7 +181,7 @@ volumes:
 docker compose up -d
 ```
 
-3. **Añadir la Configuración en `application.yml`:**
+#### 3. Añadir la Configuración en `application.yml`:
 
 * Abre el archivo `src/main/resources/application.yml` y añade la configuración para conectar con la base de
   datos.
@@ -222,7 +223,7 @@ spring:
     driver-class-name: org.postgresql.Driver
 ```
 
-4. **Crear la Primera Migración de Esquema:**
+#### 4. Crear la Primera Migración de Esquema:
 
 * Crea la carpeta `src/main/resources/db/migration/prod`.
 * Dentro, crea el archivo `V1__create_person_table.sql` con el siguiente contenido:
@@ -239,7 +240,7 @@ CREATE TABLE person
 );
 ```
 
-Tambien debe crear la entidad para mapear el esquema
+* Tambien debe crear la entidad para mapear el esquema
 
 ```java
 
@@ -267,13 +268,12 @@ public class Person implements Serializable {
 }
 ```
 
-5. **Ejecutar y Validar:**
+#### 5. Ejecutar y Validar:
 
 * Inicia la aplicación Spring Boot.
+* si el ` <defaultGoal>spring-boot:run</defaultGoal>` esta configurado en el `pom.xml`
 
-> si el ` <defaultGoal>spring-boot:run</defaultGoal>` esta configurado en el `pom.xml`
-
-ejecute:
+> ejecute:
 
 ```shell
 # Linux | Mac
@@ -285,7 +285,7 @@ ejecute:
 .\mvnw.cmd
 ```
 
-de lo contrario, ejectute:
+> de lo contrario, ejectute:
 
 ```shell
 # Linux | Mac
@@ -307,7 +307,7 @@ Si tiene **Maven** instalado globalmente, puede reemplazar `./mvnw` with `mvn`.
 Una vez que tenemos nuestra estructura base, el siguiente paso natural es modificarla. Añadiremos nuevos campos a
 nuestra tabla person sin alterar la migración original.
 
-1. **Crear una Nueva Migración para Añadir Campos:**
+#### 1. Crear una Nueva Migración para Añadir Campos:
 
 - En la carpeta `src/main/resources/db/migration/prod`, crea un nuevo archivo llamado
   `V0.0.2__add_fields_to_person.sql`. Flyway lo detectará como la siguiente versión a aplicar.
@@ -323,7 +323,7 @@ ALTER TABLE person
     ADD COLUMN birth_date DATE;
 ```
 
-2. **Actualizar la Entidad Person:**
+#### 2. Actualizar la Entidad Person:
 
 * Para que JPA pueda gestionar los nuevos campos, debemos sincronizar nuestra clase `Person.java` con el nuevo esquema
   de la
@@ -365,9 +365,9 @@ public class Person implements Serializable {
 
 ```
 
-3. **¿Qué Sucederá Ahora?**
+#### 3. ¿Qué Sucederá Ahora?
 
-> Al volver a ejecutar la aplicación (`./mvnw`), Flyway realizará el siguiente proceso:
+**Al volver a ejecutar la aplicación (`./mvnw`), Flyway realizará el siguiente proceso:**
 
 - Revisará la tabla `flyway_schema_history` y verá que la última versión aplicada es la `0.0.1`.
 - Escaneará la carpeta de migraciones (`db/migration/prod`) y encontrará el nuevo archivo
@@ -403,10 +403,10 @@ Esto le indica a Flyway que, cuando el perfil `dev` esté activo, debe escanear 
 - Mantener las migraciones de esquema y datos de producción en `db/migration/prod`.
 - Añadir scripts con datos de prueba exclusivamente en `db/migration/dev`.
 
-1. **Crear una Migración de Datos para Desarrollo**
+#### 1. Crear una Migración de Datos para Desarrollo
 
-   Vamos a crear un script que inserte algunos datos de prueba en nuestra tabla `person`. Usaremos un tipo especial de
-   migración llamada Repetible.
+Vamos a crear un script que inserte algunos datos de prueba en nuestra tabla `person`. Usaremos un tipo especial de
+migración llamada Repetible.
 
     - **Migración Versionada (V)**: Se ejecuta una sola vez. Ideal para cambios de esquema (`CREATE`, `ALTER`).
     - **Migración Repetible (R)**: Se ejecuta **cada vez que su contenido cambia**. Perfecta para gestionar datos de
@@ -414,11 +414,10 @@ Esto le indica a Flyway que, cuando el perfil `dev` esté activo, debe escanear 
     - Crea la carpeta `src/main/resources/db/migration/dev`.
     - Dentro, crea un nuevo archivo llamado `R__insert_dev_data.sql`.
 
-2. **Ejecutar con el Perfil de Desarrollo**
+#### 2. Ejecutar con el Perfil de Desarrollo
 
-   Para que Flyway aplique este nuevo script, debemos iniciar la aplicación activando el perfil `dev`.
-
-    * Ejecuta el siguiente comando en tu terminal:
+- Para que Flyway aplique este nuevo script, debemos iniciar la aplicación activando el perfil `dev`.
+- Ejecuta el siguiente comando en tu terminal:
 
 ```shell
 # Linux | Mac
@@ -430,17 +429,17 @@ Esto le indica a Flyway que, cuando el perfil `dev` esté activo, debe escanear 
 ./mvnw.cmd -Dspring.profiles.active=dev
 ```
 
-* Al arrancar, Flyway aplicará las migraciones de `prod` (si no lo ha hecho ya) y luego ejecutará la migración repetible
+- Al arrancar, Flyway aplicará las migraciones de `prod` (si no lo ha hecho ya) y luego ejecutará la migración repetible
   de `dev`, poblando tu base de datos. Si detienes la aplicación, modificas el archivo `R__insert_dev_data.sql` y
   vuelves a arrancar, Flyway detectará el cambio y volverá a ejecutar el script.
 
 **Ventajas de este Enfoque**
 
-* **Seguridad**: Garantizas que los datos de prueba nunca se instalarán en un entorno de producción, ya que el perfil
+- **Seguridad**: Garantizas que los datos de prueba nunca se instalarán en un entorno de producción, ya que el perfil
   `dev` no estará activo allí.
-* **Limpieza**: El historial de migraciones de producción se mantiene limpio y solo refleja los cambios de esquema
+- **Limpieza**: El historial de migraciones de producción se mantiene limpio y solo refleja los cambios de esquema
   reales.
-* **Productividad**: Cualquier desarrollador del equipo puede levantar un entorno local con datos consistentes y listos
+- **Productividad**: Cualquier desarrollador del equipo puede levantar un entorno local con datos consistentes y listos
   para usar con un solo comando.
 
 ```yml
@@ -515,21 +514,25 @@ spring:
 Para finalizar esta parte y poder interactuar con nuestros datos, crearemos un endpoint REST básico que nos permita
 listar, crear y actualizar personas.
 
-1. **Crear el Repositorio (`PersonRepository`):**
-    - Esta interfaz extiende `JpaRepository`, y Spring Data JPA nos proporcionará automáticamente los métodos CRUD (
-      `save`, `findById`, `findAll`, etc.).
+#### 1. Crear el Repositorio (`PersonRepository`):
 
-2. **Crear la Capa de Servicio (`PersonService`):**
-    - Es una buena práctica encapsular la lógica de negocio aquí. Nuestro servicio usará el `PersonRepository` para
-      interactuar con la base de datos.
+- Esta interfaz extiende `JpaRepository`, y Spring Data JPA nos proporcionará automáticamente los métodos CRUD (`save`,
+  `findById`, `findAll`, etc.).
 
-3. **Crear el Controlador REST (`PersonController`):**
-    - Esta clase, anotada con `@RestController`, define las URL públicas de nuestra API y mapea las solicitudes HTTP a
-      los métodos del servicio.
+#### 2. Crear la Capa de Servicio (`PersonService`):
 
-4. **Probar los Endpoints:**
-    - Una vez que la aplicación esté corriendo (con el perfil `dev` para tener datos de prueba), puedes usar `curl` o
-      cualquier cliente API para probar los endpoints.
+- Es una buena práctica encapsular la lógica de negocio aquí. Nuestro servicio usará el `PersonRepository` para
+  interactuar con la base de datos.
+
+#### 3. Crear el Controlador REST (`PersonController`):
+
+- Esta clase, anotada con `@RestController`, define las URL públicas de nuestra API y mapea las solicitudes HTTP a los
+  métodos del servicio.
+
+#### 4. Probar los Endpoints:
+
+- Una vez que la aplicación esté corriendo (con el perfil `dev` para tener datos de prueba), puedes usar `curl` o
+  cualquier cliente API para probar los endpoints.
 
 **Obtener todas las personas (GET):**
 
@@ -572,4 +575,4 @@ curl -X PUT http://localhost:8080/api/persons/1 \
 > datos que se envían o reciben, dándote control total sobre la API sin acoplarla a la estructura de tu base de datos.
 > Para este taller, usamos la entidad directamente por simplicidad.
 
-
+---
