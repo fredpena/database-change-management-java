@@ -80,7 +80,7 @@ git diff parte-2-springboot-flyway parte-3-rollbacks-validaciones
 
 ## 📝 Contenido del Taller
 
-### 🔹 [Parte 1 – Fundamentos de Database Change Management](#1-crear-el-proyecto-en-spring-initializr)
+### 🔹 Parte 1 – Fundamentos de Database Change Management
 
 - Enfoques: state-based vs migration-based
 
@@ -88,7 +88,7 @@ git diff parte-2-springboot-flyway parte-3-rollbacks-validaciones
 
 - Casos de uso y buenas prácticas
 
-### 🔹 Parte 2 – Proyecto Spring Boot + Flyway
+### 🔹 [Parte 2 – Proyecto Spring Boot + Flyway](#1-crear-el-proyecto-en-spring-initializr)
 
 - Configuración inicial
 
