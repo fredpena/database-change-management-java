@@ -96,7 +96,7 @@ git diff parte-2-springboot-flyway parte-3-rollbacks-validaciones
 
 - Migraciones versionadas y repetibles
 
-### 🔹 [Parte 3 – Rollbacks y validaciones](#rollbacks-validaciones)
+### 🔹 Parte 3 – Rollbacks y validaciones
 
 - Simulación de errores
 
