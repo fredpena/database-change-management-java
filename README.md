@@ -96,7 +96,7 @@ git diff parte-2-springboot-flyway parte-3-rollbacks-validaciones
 
 - Migraciones versionadas y repetibles
 
-### 🔹 Parte 3 – Rollbacks y validaciones
+### 🔹 [Parte 3 – Rollbacks y validaciones](#rollbacks-validaciones)
 
 - Simulación de errores
 
@@ -407,11 +407,28 @@ Esto le indica a Flyway que, cuando el perfil `dev` esté activo, debe escanear 
 Vamos a crear un script que inserte algunos datos de prueba en nuestra tabla `person`. Usaremos un tipo especial de
 migración llamada Repetible.
 
-    - **Migración Versionada (V)**: Se ejecuta una sola vez. Ideal para cambios de esquema (`CREATE`, `ALTER`).
-    - **Migración Repetible (R)**: Se ejecuta **cada vez que su contenido cambia**. Perfecta para gestionar datos de
-      prueba, vistas o procedimientos almacenados.
-    - Crea la carpeta `src/main/resources/db/migration/dev`.
-    - Dentro, crea un nuevo archivo llamado `R__insert_dev_data.sql`.
+- **Migración Versionada (V)**: Se ejecuta una sola vez. Ideal para cambios de esquema (`CREATE`, `ALTER`).
+- **Migración Repetible (R)**: Se ejecuta **cada vez que su contenido cambia**. Perfecta para gestionar datos de
+  prueba, vistas o procedimientos almacenados.
+
+1. Crea la carpeta `src/main/resources/db/migration/dev`.
+2. Dentro, crea un nuevo archivo llamado `R__insert_dev_data.sql` con el siguiente contenido:
+
+```sql
+-- Este es un script de migración REPETIBLE (comienza con R__)
+-- Se ejecutará cada vez que su contenido (checksum) cambie.
+-- Es ideal para gestionar datos de prueba en desarrollo.
+
+-- Borramos los datos existentes para asegurar un estado limpio en cada ejecución.
+DELETE
+FROM person;
+
+-- Insertamos datos de prueba.
+INSERT INTO person (first_name, last_name, email, address, phone_number, birth_date)
+VALUES ('John', 'Doe', 'john.doe@example.com', '123 Main St', '555-0101', '1990-05-15'),
+       ('Jane', 'Smith', 'jane.smith@example.com', '456 Oak Ave', '555-0102', '1988-11-22'),
+       ('Peter', 'Jones', 'peter.jones@example.com', '789 Pine Ln', '555-0103', '1995-02-10');
+```
 
 #### 2. Ejecutar con el Perfil de Desarrollo
 
