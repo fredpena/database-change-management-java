@@ -88,7 +88,7 @@ git diff parte-2-springboot-flyway parte-3-rollbacks-validaciones
 
 - Casos de uso y buenas prácticas
 
-### 🔹 [Parte 2 – Proyecto Spring Boot + Flyway](#1-crear-el-proyecto-en-spring-initializr)
+### 🔹 [Parte 2 – Proyecto Spring Boot + Flyway](#spring-flyway)
 
 - Configuración inicial
 
@@ -136,8 +136,7 @@ documento.
 - Casos de uso y buenas prácticas
 
 ---
-
-### 🔹 Parte 2 – Proyecto Spring Boot + Flyway
+<h3 id="spring-flyway">🔹 Parte 2 – Proyecto Spring Boot + Flyway</h3>
 
 > - 🏁 Punto de partida: Rama `main`.
 > - 🎯 Solución final: Rama `parte-2-springboot-flyway`.
