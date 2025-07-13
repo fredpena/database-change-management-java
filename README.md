@@ -104,7 +104,7 @@ git diff parte-2-springboot-flyway parte-3-rollbacks-validaciones
 
 - Control de checksum
 
-### 🔹 Parte 4 – CI/CD con GitHub Actions
+### 🔹 [Parte 4 – CI/CD con GitHub Actions](#cicd-github-actions)
 
 - Automatización del build y migraciones
 
@@ -857,3 +857,27 @@ Aquí tienes una comparación directa para que quede clara la diferencia:
 Para este taller y para la mayoría de los proyectos que utilizan la versión gratuita de Flyway, **el método del "
 Rollback Simulado" (crear una nueva migración) es la práctica recomendada**. Es la forma más segura y transparente de
 gestionar el historial de tu base de datos.
+
+
+---
+<h3 id="cicd-github-actions">🔹 Parte 4 – CI/CD con GitHub Actions</h3>
+
+> - 🏁 **Punto de partida:** Rama `parte-3-rollbacks-validaciones`.
+> - 🎯 **Solución final:** Rama `parte-4-cicd-github-actions`.
+
+En esta sección, automatizaremos nuestro proceso de desarrollo utilizando GitHub Actions. Crearemos un pipeline que
+compile, pruebe y, finalmente, despliegue nuestras migraciones de base de datos de forma segura.
+
+#### 1. Crear el Workflow de Integración Continua (CI)
+
+El primer paso en cualquier pipeline de CI/CD es la Integración Continua (CI). Su objetivo es asegurar que cada cambio
+subido al repositorio no rompa la aplicación. Para ello, crearemos un workflow que automáticamente compile el código y
+ejecute las pruebas.
+
+- **Crear la estructura de carpetas:**
+    - En la raíz de tu proyecto, crea un directorio `.github` y, dentro de él, otro directorio llamado `workflows`.
+- **Crear el archivo de workflow:**
+    - Dentro de la carpeta `.github/workflows`, crea un nuevo archivo llamado `ci.yml` con el siguiente contenido:
+
+```yml
+```
