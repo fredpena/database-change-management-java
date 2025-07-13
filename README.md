@@ -24,6 +24,46 @@ usando **Flyway**, **Spring Boot**, **GitHub Actions** y un enfoque final aplica
 4. `parte-4-cicd-github-actions`: integración de pipeline.
 5. `parte-5-multitenancy-vaadin`: configuración multitenancy con Flyway dinámico.
 
+🗂️ **Cómo navegar entre las distintas partes del taller**
+
+Este taller está organizado en un único repositorio con varias ramas, cada una representando una etapa del aprendizaje. Puedes cambiar de rama para explorar el código de cada sección y ejecutarlo en tu entorno local.
+
+```shell
+# Ver todas las ramas disponibles
+git branch -r
+
+# Cambiar a la rama correspondiente a la Parte 2
+git checkout parte-2-springboot-flyway
+
+# Para ir a la siguiente parte, cambia de rama:
+git checkout parte-3-rollbacks-validaciones
+
+# Continúa así con:
+git checkout parte-4-cicd-github-actions
+git checkout parte-5-multitenancy-vaadin
+```
+
+> 💡 Asegúrate de haber guardado tus cambios antes de cambiar de rama. Cada rama contiene una versión funcional del proyecto enfocada en una etapa del taller.
+
+▶️ **Ejecutar el proyecto después de cambiar de rama**
+
+```shell
+# En Windows
+.\mvnw.cmd spring-boot:run
+
+# En Linux/macOS
+./mvnw spring-boot:run
+```
+
+✅ **Recomendación**
+
+Si solo quieres ver los cambios entre partes, puedes usar:
+
+```shell
+git diff parte-2-springboot-flyway parte-3-rollbacks-validaciones
+```
+
+
 ## 🧰 Requisitos Técnicos Previos
 
 ### 📦 Herramientas que necesitas instalar antes del taller:
