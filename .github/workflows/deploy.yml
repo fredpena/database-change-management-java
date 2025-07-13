@@ -2,18 +2,17 @@ name: Deploy to Railway
 
 on:
   push:
-    branches: [ "parte-4-cicd-github-actions" ]
-  pull_request:
-    branches: [ "parte-4-cicd-github-actions" ]
-
-  workflow_dispatch:
+    branches: [ main ]
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      SVC_ID: my-service-id
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up JDK 21
@@ -23,16 +22,13 @@ jobs:
           java-version: 21
           cache: maven
 
-      - name: Build project
+      - name: Build with Maven
         run: mvn clean package -DskipTests
 
       - name: Install Railway CLI
         run: curl -fsSL https://railway.app/install.sh | sh
 
-      # El paso de 'login' se ha eliminado.
-
       - name: Deploy to Railway
-        # Le pasamos el token como una variable de entorno al comando 'up'
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-        run: railway up
+        run: |
+          railway login --token $RAILWAY_TOKEN
+          railway up --service=$SVC_ID
