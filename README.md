@@ -88,7 +88,7 @@ git diff parte-2-springboot-flyway parte-3-rollbacks-validaciones
 
 - Casos de uso y buenas prácticas
 
-### 🔹 Parte 2 – Proyecto Spring Boot + Flyway
+### 🔹 [Parte 2 – Proyecto Spring Boot + Flyway](#spring-flyway)
 
 - Configuración inicial
 
@@ -96,7 +96,7 @@ git diff parte-2-springboot-flyway parte-3-rollbacks-validaciones
 
 - Migraciones versionadas y repetibles
 
-### 🔹 Parte 3 – Rollbacks y validaciones
+### 🔹 [Parte 3 – Rollbacks y validaciones](#rollbacks-validaciones)
 
 - Simulación de errores
 
@@ -136,28 +136,28 @@ documento.
 - Casos de uso y buenas prácticas
 
 ---
-
-### 🔹 Parte 2 – Proyecto Spring Boot + Flyway
+<h3 id="spring-flyway">🔹 Parte 2 – Proyecto Spring Boot + Flyway</h3>
 
 > - 🏁 Punto de partida: Rama `main`.
 > - 🎯 Solución final: Rama `parte-2-springboot-flyway`.
 
 En esta sección, configuraremos nuestro proyecto y crearemos las primeras migraciones.
 
-1. **Crear el Proyecto en Spring Initializr:**
-    - Ve a [start.spring.io](https://start.spring.io/) y configura un proyecto Maven con Java 21.
-    - Añade las siguientes dependencias: `Spring Web`, `Flyway Migration`, `PostgreSQL Driver`, `Spring Data JPA`, y
-      `Lombok` (opcional, pero recomendado).
+#### 1. Crear el Proyecto en Spring Initializr:
 
-2. **Configurar la Base de Datos con Docker:**
+- Ve a [start.spring.io](https://start.spring.io/) y configura un proyecto Maven con Java 21.
+- Añade las siguientes dependencias: `Spring Web`, `Flyway Migration`, `PostgreSQL Driver`, `Spring Data JPA`, y
+  `Lombok` (opcional, pero recomendado).
 
-* Abre una terminal y ejecuta el siguiente comando para iniciar un contenedor de PostgreSQL:
+#### 2. **Configurar la Base de Datos con Docker:**
+
+- Abre una terminal y ejecuta el siguiente comando para iniciar un contenedor de PostgreSQL:
 
 ```shell
 docker run --name postgres_workshop -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=workshop_db -p 5432:5432 -d postgres:15
 ```
 
-* O ejecuta el `docker-compose.yml` si lo prefieres:
+- O ejecuta el `docker-compose.yml` si lo prefieres:
 
 ```yml
 services:
@@ -180,7 +180,7 @@ volumes:
 docker compose up -d
 ```
 
-3. **Añadir la Configuración en `application.yml`:**
+#### 3. Añadir la Configuración en `application.yml`:
 
 * Abre el archivo `src/main/resources/application.yml` y añade la configuración para conectar con la base de
   datos.
@@ -222,7 +222,7 @@ spring:
     driver-class-name: org.postgresql.Driver
 ```
 
-4. **Crear la Primera Migración de Esquema:**
+#### 4. Crear la Primera Migración de Esquema:
 
 * Crea la carpeta `src/main/resources/db/migration/prod`.
 * Dentro, crea el archivo `V1__create_person_table.sql` con el siguiente contenido:
@@ -239,7 +239,7 @@ CREATE TABLE person
 );
 ```
 
-Tambien debe crear la entidad para mapear el esquema
+* Tambien debe crear la entidad para mapear el esquema
 
 ```java
 
@@ -267,13 +267,12 @@ public class Person implements Serializable {
 }
 ```
 
-5. **Ejecutar y Validar:**
+#### 5. Ejecutar y Validar:
 
 * Inicia la aplicación Spring Boot.
+* si el ` <defaultGoal>spring-boot:run</defaultGoal>` esta configurado en el `pom.xml`
 
-> si el ` <defaultGoal>spring-boot:run</defaultGoal>` esta configurado en el `pom.xml`
-
-ejecute:
+> ejecute:
 
 ```shell
 # Linux | Mac
@@ -285,7 +284,7 @@ ejecute:
 .\mvnw.cmd
 ```
 
-de lo contrario, ejectute:
+> de lo contrario, ejectute:
 
 ```shell
 # Linux | Mac
@@ -307,7 +306,7 @@ Si tiene **Maven** instalado globalmente, puede reemplazar `./mvnw` with `mvn`.
 Una vez que tenemos nuestra estructura base, el siguiente paso natural es modificarla. Añadiremos nuevos campos a
 nuestra tabla person sin alterar la migración original.
 
-1. **Crear una Nueva Migración para Añadir Campos:**
+#### 1. Crear una Nueva Migración para Añadir Campos:
 
 - En la carpeta `src/main/resources/db/migration/prod`, crea un nuevo archivo llamado
   `V0.0.2__add_fields_to_person.sql`. Flyway lo detectará como la siguiente versión a aplicar.
@@ -323,7 +322,7 @@ ALTER TABLE person
     ADD COLUMN birth_date DATE;
 ```
 
-2. **Actualizar la Entidad Person:**
+#### 2. Actualizar la Entidad Person:
 
 * Para que JPA pueda gestionar los nuevos campos, debemos sincronizar nuestra clase `Person.java` con el nuevo esquema
   de la
@@ -365,9 +364,9 @@ public class Person implements Serializable {
 
 ```
 
-3. **¿Qué Sucederá Ahora?**
+#### 3. ¿Qué Sucederá Ahora?
 
-> Al volver a ejecutar la aplicación (`./mvnw`), Flyway realizará el siguiente proceso:
+**Al volver a ejecutar la aplicación (`./mvnw`), Flyway realizará el siguiente proceso:**
 
 - Revisará la tabla `flyway_schema_history` y verá que la última versión aplicada es la `0.0.1`.
 - Escaneará la carpeta de migraciones (`db/migration/prod`) y encontrará el nuevo archivo
@@ -403,22 +402,38 @@ Esto le indica a Flyway que, cuando el perfil `dev` esté activo, debe escanear 
 - Mantener las migraciones de esquema y datos de producción en `db/migration/prod`.
 - Añadir scripts con datos de prueba exclusivamente en `db/migration/dev`.
 
-1. **Crear una Migración de Datos para Desarrollo**
+#### 1. Crear una Migración de Datos para Desarrollo
 
-   Vamos a crear un script que inserte algunos datos de prueba en nuestra tabla `person`. Usaremos un tipo especial de
-   migración llamada Repetible.
+Vamos a crear un script que inserte algunos datos de prueba en nuestra tabla `person`. Usaremos un tipo especial de
+migración llamada Repetible.
 
-    - **Migración Versionada (V)**: Se ejecuta una sola vez. Ideal para cambios de esquema (`CREATE`, `ALTER`).
-    - **Migración Repetible (R)**: Se ejecuta **cada vez que su contenido cambia**. Perfecta para gestionar datos de
-      prueba, vistas o procedimientos almacenados.
-    - Crea la carpeta `src/main/resources/db/migration/dev`.
-    - Dentro, crea un nuevo archivo llamado `R__insert_dev_data.sql`.
+- **Migración Versionada (V)**: Se ejecuta una sola vez. Ideal para cambios de esquema (`CREATE`, `ALTER`).
+- **Migración Repetible (R)**: Se ejecuta **cada vez que su contenido cambia**. Perfecta para gestionar datos de
+  prueba, vistas o procedimientos almacenados.
 
-2. **Ejecutar con el Perfil de Desarrollo**
+1. Crea la carpeta `src/main/resources/db/migration/dev`.
+2. Dentro, crea un nuevo archivo llamado `R__insert_dev_data.sql` con el siguiente contenido:
 
-   Para que Flyway aplique este nuevo script, debemos iniciar la aplicación activando el perfil `dev`.
+```sql
+-- Este es un script de migración REPETIBLE (comienza con R__)
+-- Se ejecutará cada vez que su contenido (checksum) cambie.
+-- Es ideal para gestionar datos de prueba en desarrollo.
 
-    * Ejecuta el siguiente comando en tu terminal:
+-- Borramos los datos existentes para asegurar un estado limpio en cada ejecución.
+DELETE
+FROM person;
+
+-- Insertamos datos de prueba.
+INSERT INTO person (first_name, last_name, email, address, phone_number, birth_date)
+VALUES ('John', 'Doe', 'john.doe@example.com', '123 Main St', '555-0101', '1990-05-15'),
+       ('Jane', 'Smith', 'jane.smith@example.com', '456 Oak Ave', '555-0102', '1988-11-22'),
+       ('Peter', 'Jones', 'peter.jones@example.com', '789 Pine Ln', '555-0103', '1995-02-10');
+```
+
+#### 2. Ejecutar con el Perfil de Desarrollo
+
+- Para que Flyway aplique este nuevo script, debemos iniciar la aplicación activando el perfil `dev`.
+- Ejecuta el siguiente comando en tu terminal:
 
 ```shell
 # Linux | Mac
@@ -430,17 +445,17 @@ Esto le indica a Flyway que, cuando el perfil `dev` esté activo, debe escanear 
 ./mvnw.cmd -Dspring.profiles.active=dev
 ```
 
-* Al arrancar, Flyway aplicará las migraciones de `prod` (si no lo ha hecho ya) y luego ejecutará la migración repetible
+- Al arrancar, Flyway aplicará las migraciones de `prod` (si no lo ha hecho ya) y luego ejecutará la migración repetible
   de `dev`, poblando tu base de datos. Si detienes la aplicación, modificas el archivo `R__insert_dev_data.sql` y
   vuelves a arrancar, Flyway detectará el cambio y volverá a ejecutar el script.
 
 **Ventajas de este Enfoque**
 
-* **Seguridad**: Garantizas que los datos de prueba nunca se instalarán en un entorno de producción, ya que el perfil
+- **Seguridad**: Garantizas que los datos de prueba nunca se instalarán en un entorno de producción, ya que el perfil
   `dev` no estará activo allí.
-* **Limpieza**: El historial de migraciones de producción se mantiene limpio y solo refleja los cambios de esquema
+- **Limpieza**: El historial de migraciones de producción se mantiene limpio y solo refleja los cambios de esquema
   reales.
-* **Productividad**: Cualquier desarrollador del equipo puede levantar un entorno local con datos consistentes y listos
+- **Productividad**: Cualquier desarrollador del equipo puede levantar un entorno local con datos consistentes y listos
   para usar con un solo comando.
 
 ```yml
@@ -515,21 +530,25 @@ spring:
 Para finalizar esta parte y poder interactuar con nuestros datos, crearemos un endpoint REST básico que nos permita
 listar, crear y actualizar personas.
 
-1. **Crear el Repositorio (`PersonRepository`):**
-    - Esta interfaz extiende `JpaRepository`, y Spring Data JPA nos proporcionará automáticamente los métodos CRUD (
-      `save`, `findById`, `findAll`, etc.).
+#### 1. Crear el Repositorio (`PersonRepository`):
 
-2. **Crear la Capa de Servicio (`PersonService`):**
-    - Es una buena práctica encapsular la lógica de negocio aquí. Nuestro servicio usará el `PersonRepository` para
-      interactuar con la base de datos.
+- Esta interfaz extiende `JpaRepository`, y Spring Data JPA nos proporcionará automáticamente los métodos CRUD (`save`,
+  `findById`, `findAll`, etc.).
 
-3. **Crear el Controlador REST (`PersonController`):**
-    - Esta clase, anotada con `@RestController`, define las URL públicas de nuestra API y mapea las solicitudes HTTP a
-      los métodos del servicio.
+#### 2. Crear la Capa de Servicio (`PersonService`):
 
-4. **Probar los Endpoints:**
-    - Una vez que la aplicación esté corriendo (con el perfil `dev` para tener datos de prueba), puedes usar `curl` o
-      cualquier cliente API para probar los endpoints.
+- Es una buena práctica encapsular la lógica de negocio aquí. Nuestro servicio usará el `PersonRepository` para
+  interactuar con la base de datos.
+
+#### 3. Crear el Controlador REST (`PersonController`):
+
+- Esta clase, anotada con `@RestController`, define las URL públicas de nuestra API y mapea las solicitudes HTTP a los
+  métodos del servicio.
+
+#### 4. Probar los Endpoints:
+
+- Una vez que la aplicación esté corriendo (con el perfil `dev` para tener datos de prueba), puedes usar `curl` o
+  cualquier cliente API para probar los endpoints.
 
 **Obtener todas las personas (GET):**
 
@@ -572,4 +591,269 @@ curl -X PUT http://localhost:8080/api/persons/1 \
 > datos que se envían o reciben, dándote control total sobre la API sin acoplarla a la estructura de tu base de datos.
 > Para este taller, usamos la entidad directamente por simplicidad.
 
+---
+<h3 id="rollbacks-validaciones">🔹 Parte 3 – Rollbacks y Validaciones</h3>
 
+> - 🏁 **Punto de partida:** Rama `parte-2-springboot-flyway`.
+> - 🎯 **Solución final:** Rama `parte-3-rollbacks-validaciones`.
+
+En esta parte, exploraremos cómo Flyway maneja los errores y qué estrategias tenemos para recuperarnos.
+
+#### 1. Simulación de una Migración Fallida
+
+La característica más importante de Flyway es su comportamiento transaccional por defecto. Para verlo en acción, vamos a
+introducir deliberadamente un error en una nueva migración.
+
+- **Crear una migración con un error:**
+    - En la carpeta `src/main/resources/db/migration/prod`, crea el archivo `V0.0.3__add_department_table.sql`.
+    - El error es intencionado: usamos VARCHARR en lugar de VARCHAR.
+
+```sql
+-- V0.0.3__add_department_table.sql
+-- Esta migración contiene un error de sintaxis deliberado para simular un fallo.
+
+CREATE TABLE department
+(
+    id   BIGSERIAL PRIMARY KEY,
+    name VARCHARR(100) NOT NULL -- ¡ERROR! 'VARCHARR' no es un tipo de dato válido.
+);
+
+-- También añadimos una columna a la tabla 'person' para la clave foránea.
+ALTER TABLE person
+    ADD COLUMN department_id BIGINT;
+
+ALTER TABLE person
+    ADD CONSTRAINT fk_person_department
+        FOREIGN KEY (department_id) REFERENCES department (id);
+
+```
+
+- **Ejecutar y observar el fallo:**
+    - Al iniciar la aplicación, esta fallará. La consola mostrará un error `Flyway-Migration-Failed-Error`, indicando
+      que el tipo `varcharr` no existe.
+
+- **Análisis del Resultado (¿Qué ha Pasado y Por Qué es Importante?):**
+    - **Seguridad Transaccional**: Flyway ejecutó la migración dentro de una transacción. Al fallar, hizo un `ROLLBACK`
+      completo. Tu esquema de base de datos no ha cambiado en absoluto.
+    - **Estado de Bloqueo**: Flyway ha marcado la migración `V0.0.3` como `FAILED` en su tabla `flyway_schema_history`.
+      Esto es una medida de seguridad para prevenir más cambios hasta que el problema sea resuelto por un desarrollador.
+
+#### 2. Cómo Recuperarse del Fallo
+
+Ahora que la base de datos está en un estado "bloqueado", debemos intervenir manualmente. El proceso es simple y seguro.
+
+- **Paso 1: Corregir el Script de Migración**
+    - Abre el archivo `V0.0.3__add_department_table.sql` y corrige el error de sintaxis.
+
+```sql
+-- V0.0.3__add_department_table.sql (Corregido)
+CREATE TABLE department
+(
+    id   BIGSERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL -- ¡CORREGIDO!
+);
+
+-- También añadimos una columna a la tabla 'person' para la clave foránea.
+ALTER TABLE person
+    ADD COLUMN department_id BIGINT;
+
+ALTER TABLE person
+    ADD CONSTRAINT fk_person_department
+        FOREIGN KEY (department_id) REFERENCES department (id);
+
+```
+
+- **Paso 2: Configurar el Plugin de Maven (¡Paso Crucial!)**
+    - Para usar comandos de Flyway directamente desde Maven (como `repair` o `info`), debemos configurar el plugin en el
+      `pom.xml`, ya que no lee el `application.yml`.
+    - Añade esto a tu pom.xml dentro de `<plugins>`:
+
+```xml
+
+<properties>
+    <spring.datasource.url>jdbc:postgresql://localhost:5432/workshop_db</spring.datasource.url>
+    <spring.datasource.username>postgres</spring.datasource.username>
+    <spring.datasource.password>postgres</spring.datasource.password>
+</properties>
+
+<plugin>
+<groupId>org.flywaydb</groupId>
+<artifactId>flyway-maven-plugin</artifactId>
+<configuration>
+    <!-- Le decimos al plugin dónde encontrar la base de datos -->
+    <url>${spring.datasource.url}</url>
+    <user>${spring.datasource.username}</user>
+    <password>${spring.datasource.password}</password>
+    <!-- También es bueno decirle dónde están los scripts -->
+    <locations>
+        <location>classpath:db/migration/prod</location>
+    </locations>
+</configuration>
+</plugin>
+```
+
+> Importante: En algunos entornos, en este punto, si intentas ejecutar la aplicación de nuevo, ¡fallará! Flyway todavía
+> ve el estado `FAILED` en su tabla de historial y no continuará.
+
+- **Paso 3: Reparar el Historial de Flyway**
+    - Necesitamos decirle a Flyway que "olvide" el estado fallido. Para esto, usamos el comando `repair`.
+    - Ejecuta el siguiente comando en tu terminal (con la aplicación detenida):
+    - El comando `repair` revisa la tabla `flyway_schema_history`, elimina todas las filas con estado FAILED y recalcula
+      los checksums de las migraciones existentes.
+
+```shell
+# Linux | Mac
+./mvnw flyway:repair
+
+# Windows
+./mvnw.cmd flyway:repair
+```
+
+- **Paso 4: Volver a Ejecutar la Migración**
+    - Ahora que el script está corregido y el historial de Flyway está limpio, simplemente inicia la aplicación de
+      nuevo.
+    - Flyway verá que la migración `V0.0.3` no ha sido aplicada (porque eliminamos el registro fallido) y la ejecutará.
+      Esta vez, tendrá éxito.
+
+#### 3. Control de Checksum: ¿Qué pasa si se edita una migración aplicada?
+
+Flyway almacena un "checksum" (una huella digital) de cada migración. Si modificas un script que ya se ejecutó, el nuevo
+checksum no coincidirá y Flyway fallará por seguridad.
+
+- **Simulación:**
+    - Abre el archivo `V1__create_person_table.sql` (que ya fue aplicado) y añade un simple comentario SQL (
+      `-- Un cambio inocente`).
+    - Ejecuta la aplicación. Fallará con un error de validación: `Migration checksum mismatch for migration V0.0.1`.
+- **Recuperación:**
+    - El comando `flyway:repair` también soluciona esto. Actualiza el checksum en la tabla de historial.
+
+```shell 
+./mvnw flyway:repair
+```
+
+> ⚠️ **Advertencia**: Solo debes reparar un checksum si el cambio es trivial (comentarios, formato). Si el cambio afecta
+> la lógica del esquema, la forma correcta es crear una nueva migración (V4, V5, etc.).
+
+#### 4. Revertir con una Nueva Migración (El "Rollback Simulado" - Método Gratuito)
+
+Este es el método más común y compatible con todas las versiones de Flyway. La filosofía es que el historial de la base
+de datos solo avanza. Para deshacer algo, creas una nueva migración que lo revierta.
+
+- **Crear una migración de reversión:**
+    - Crea un nuevo archivo `V0.0.4__revert_add_department_table.sql`.
+
+```sql
+-- V0.0.4__revert_add_department_table.sql
+-- Este script revierte los cambios hechos en la migración V3,
+-- siguiendo la estrategia de "rollback simulado".
+
+-- 1. Eliminar la clave foránea (FOREIGN KEY) de la tabla 'person'.
+-- Usamos 'IF EXISTS' para que el script no falle si la restricción ya fue eliminada.
+ALTER TABLE person
+DROP
+CONSTRAINT IF EXISTS fk_person_department;
+
+-- 2. Eliminar la columna 'department_id' de la tabla 'person'.
+ALTER TABLE person
+DROP
+COLUMN IF EXISTS department_id;
+
+-- 3. Finalmente, eliminar la tabla 'department'.
+DROP TABLE IF EXISTS department;
+```
+
+```shell
+./mvnw flyway:repair    
+```
+
+- **Ejecutar y Validar**
+    - Simplemente ejecuta la aplicación. Flyway aplicará `V0.0.4` como cualquier otra migración.
+    - **Resultado**: El esquema de la base de datos vuelve a estar como antes de `V0.0.3`, pero el historial de Flyway
+      ahora muestra que `V0.0.1`, `V0.0.2`, `V0.0.3` y `V0.0.4` se aplicaron con éxito. Es un registro de auditoría
+      completo de todo lo que ha ocurrido.
+
+#### 5. Scripts de Reversión (Undo Migrations) - Característica de Pago
+
+> ⚠️ **Importante:** La ejecución automática de scripts de "Undo" con `flyway:undo` es una **característica de pago** y
+> no funcionará con la versión gratuita que usamos. Sin embargo, crear el script es una excelente práctica de
+> planificación.
+
+La edición Community de Flyway no soporta `rollbacks` automáticos, pero sí el concepto de **migraciones de "deshacer" (
+Undo)**. Son scripts que revierten manualmente los cambios de una migración.
+
+- **Convención**: Un script de Undo se nombra `U<MISMA_VERSION>__<DESCRIPCION>.sql`.
+- **Crear un script de Undo**:
+    - Para planificar la reversión de nuestra migración `V0.0.3`, crea el archivo `U0.0.3__revert_department_table.sql`
+      en la misma carpeta (`db/migration/prod`) con el siguiente contenido. El script debe realizar las operaciones
+      inversas a las de la migración original.
+
+```sql
+-- U3__revert_department_table.sql
+-- Este es un script de "Undo" (reversión). Su propósito es deshacer
+-- los cambios realizados por la migración V3__add_department_table.sql.
+-- Las operaciones se realizan en el orden inverso a la creación.
+
+-- 1. Eliminar la clave foránea (FOREIGN KEY) de la tabla 'person'.
+-- Usamos 'IF EXISTS' para que el script no falle si la restricción ya fue eliminada.
+ALTER TABLE person
+DROP
+CONSTRAINT IF EXISTS fk_person_department;
+
+-- 2. Eliminar la columna 'department_id' de la tabla 'person'.
+ALTER TABLE person
+DROP
+COLUMN IF EXISTS department_id;
+
+-- 3. Finalmente, eliminar la tabla 'department'.
+DROP TABLE IF EXISTS department;
+```
+
+- **Ejecutar el Undo:**
+    - Usa el comando `flyway:undo` desde Maven. Flyway buscará el script U3 y lo ejecutará, revirtiendo la base de datos
+      al estado previo a `V0.0.3`.
+    - Después de ejecutar `undo`, la tabla `flyway_schema_history` ya no contendrá el registro de la migración `V0.0.3`.
+
+### ¿Qué Método de Reversión Elegir?
+
+Hemos visto dos formas de revertir una migración que ya se aplicó con éxito. Aunque el resultado final en el esquema de
+la base de datos puede ser el mismo, la filosofía y el impacto en el historial de Flyway son muy diferentes.
+
+Aquí tienes una comparación directa para que quede clara la diferencia:
+
+#### Característica
+
+- Rollback Simulado (Nueva Migración `V`)
+- Scripts de `Undo` (Migración `U`)
+
+#### Coste
+
+- ✅ **Gratuito**. Incluido en la versión Community.
+- ❌ **De Pago**. Requiere licencia de Flyway Teams/Enterprise.
+
+#### Filosofía
+
+- La base de datos siempre evoluciona hacia adelante.
+- Para deshacer algo, creamos una nueva evolución que lo contrarreste.
+- Podemos retroceder y deshacer un paso.
+- Se modifica el estado de una migración pasada.
+
+#### Impacto en el Historial
+
+- **Lineal e Inmutable**. Se añade una nueva migración (`V0.0.4`) que se marca como `SUCCESS`. El historial es un
+  registro
+  completo de todo lo que ha ocurrido, sin alteraciones.
+- **Modificable**. La migración original (`V0.0.3`) cambia su estado a `UNDONE`. El historial se
+  altera para reflejar que una acción fue explícitamente revertida.
+
+#### Cuándo usarlo
+
+- Es el método estándar y recomendado para la mayoría de los casos. Es seguro, mantiene un registro de auditoría
+  completo y no requiere licencias.
+- En equipos que han adquirido la licencia y prefieren un historial que muestre explícitamente las reversiones en lugar
+  de contrarrestarlas con nuevas migraciones.
+
+#### En resumen:
+
+Para este taller y para la mayoría de los proyectos que utilizan la versión gratuita de Flyway, **el método del "
+Rollback Simulado" (crear una nueva migración) es la práctica recomendada**. Es la forma más segura y transparente de
+gestionar el historial de tu base de datos.

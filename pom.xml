@@ -12,6 +12,9 @@
 
     <properties>
         <java.version>21</java.version>
+        <spring.datasource.url>jdbc:postgresql://localhost:5432/workshop_db</spring.datasource.url>
+        <spring.datasource.username>postgres</spring.datasource.username>
+        <spring.datasource.password>postgres</spring.datasource.password>
     </properties>
 
     <parent>
@@ -56,7 +59,6 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-            <version>9.21.2</version>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
@@ -92,6 +94,21 @@
                     <jvmArguments>-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5630</jvmArguments>
                     <wait>500</wait>
                     <maxAttempts>240</maxAttempts>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-maven-plugin</artifactId>
+                <configuration>
+                    <!-- Le decimos al plugin dónde encontrar la base de datos -->
+                    <url>${spring.datasource.url}</url>
+                    <user>${spring.datasource.username}</user>
+                    <password>${spring.datasource.password}</password>
+                    <!-- También es bueno decirle dónde están los scripts -->
+                    <locations>
+                        <location>classpath:db/migration/prod</location>
+                    </locations>
                 </configuration>
             </plugin>
         </plugins>
