@@ -8,21 +8,30 @@ usando **Flyway**, **Spring Boot**, **GitHub Actions** y un enfoque final aplica
 
 ## 🎯 Objetivos del Taller
 
-- Entender los conceptos clave de Database Change Management (DCM).
-- Aprender a usar Flyway para versionar esquemas y aplicar migraciones.
-- Implementar estrategias de rollback.
-- Automatizar el despliegue con GitHub Actions.
-- Diseñar un enfoque multitenancy para migraciones dinámicas por cliente.
+- **Dominar los fundamentos** de Database Change Management (DCM) y las mejores prácticas de Flyway.
+- **Implementar un ciclo de vida completo de migraciones** en una aplicación Spring Boot, incluyendo scripts
+  versionados (`V`) y repetibles (`R`).
+- **Gestionar y recuperarse de errores** en migraciones, entendiendo el control de checksums y las estrategias de
+  rollback.
+- **Automatizar el proceso de CI/CD** con GitHub Actions para asegurar la calidad y la consistencia del código y las
+  migraciones.
+- **Diseñar e implementar una arquitectura multitenancy** real usando el enfoque de columna discriminadora con Hibernate
+  y Vaadin.
+- **Simular y analizar entornos de despliegue complejos** con Docker Compose para demostrar visualmente la importancia
+  de desacoplar las migraciones.
 
 ---
 
 ## 🌿 Ramas del taller
 
-1. `main`: proyecto base con estructura mínima (README, .gitignore, etc.).
-2. `parte-2-springboot-flyway`: configuración inicial y primeras migraciones.
-3. `parte-3-rollbacks-validaciones`: simulación de errores y control de checksum.
-4. `parte-4-cicd-github-actions`: integración de pipeline.
-5. `parte-5-multitenancy-vaadin`: configuración multitenancy con Flyway dinámico.
+1. `main`: Proyecto base con estructura mínima (README, .gitignore, etc.).
+2. `parte-2-springboot-flyway`: Configuración inicial de Spring Boot + Flyway y creación de las primeras migraciones de
+   esquema (`V`) y datos de prueba (`R`).
+3. `parte-3-rollbacks-validaciones`: Simulación de errores, gestión de migraciones fallidas y estrategias de rollback.
+4. `parte-4-cicd-github-actions`: Creación de un pipeline de Integración Continua (CI) con GitHub Actions para compilar
+   y validar el proyecto.
+5. `parte-5-multitenancy-vaadin`: Implementación de arquitectura multitenancy (columna discriminadora) y demostración de
+   estrategias de despliegue con Docker Compose.
 
 🗂️ **Cómo navegar entre las distintas partes del taller**
 
@@ -65,6 +74,8 @@ Si solo quieres ver los cambios entre partes, puedes usar:
 git diff parte-2-springboot-flyway parte-3-rollbacks-validaciones
 ```
 
+---
+
 ## 🧰 Requisitos Técnicos Previos
 
 ### 📦 Herramientas que necesitas instalar antes del taller:
@@ -82,43 +93,33 @@ git diff parte-2-springboot-flyway parte-3-rollbacks-validaciones
 
 ### 🔹 Parte 1 – Fundamentos de Database Change Management
 
-- Enfoques: state-based vs migration-based
-
-- Herramientas: Flyway vs Liquibase
-
-- Casos de uso y buenas prácticas
+- Enfoques: state-based vs migration-based.
+- Herramientas: Flyway vs Liquibase.
+- Casos de uso y buenas prácticas.
 
 ### 🔹 [Parte 2 – Proyecto Spring Boot + Flyway](#spring-flyway)
 
-- Configuración inicial
-
-- Primeras migraciones de esquema y datos
-
-- Migraciones versionadas y repetibles
+- Configuración inicial del proyecto.
+- Creación de migraciones versionadas (`V`) para el esquema.
+- Uso de perfiles de Spring para gestionar migraciones repetibles (`R`) con datos de prueba.
 
 ### 🔹 [Parte 3 – Rollbacks y validaciones](#rollbacks-validaciones)
 
-- Simulación de errores
-
-- Scripts de reversión manuales
-
-- Control de checksum
+- Simulación de migraciones fallidas y análisis del comportamiento transaccional.
+- Recuperación de errores con `flyway:repair`.
+- Control de checksums y estrategias de rollback (simulado vs. `undo`).
 
 ### 🔹 [Parte 4 – CI/CD con GitHub Actions](#cicd-github-actions)
 
-- Automatización del build y migraciones
+- Creación de un pipeline de Integración Continua.
+- Automatización del build y validación del proyecto en cada `push`.
 
-- Ejecución del pipeline y despliegue simulado
+### 🔹 [Parte 5 – Arquitectura Multitenancy y Despliegue Avanzado](#multitenancy-vaadin)
 
-### 🔹 Parte 5 – Migraciones en entornos Multitenancy
-
-- Enfoque base de datos por cliente
-
-- Flyway dinámico según tenant seleccionado
-
-- Integración con Vaadin Flow
-
----
+- Análisis de estrategias de multitenancy (énfasis en columna discriminadora).
+- Integración con Hibernate `@TenantId` y `VaadinSession`.
+- Simulación de despliegues con réplicas usando Docker Compose para demostrar patrones de migración seguros vs.
+  inseguros.
 
 ---
 
@@ -880,4 +881,519 @@ ejecute las pruebas.
     - Dentro de la carpeta `.github/workflows`, crea un nuevo archivo llamado `ci.yml` con el siguiente contenido:
 
 ```yml
+# .github/workflows/ci.yml
+name: Java CI with Maven
+
+on:
+  push:
+    branches: [ "main", "parte-*" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build with Maven
+        # Ejecuta el build con el perfil de producción para asegurar que todo compile
+        # correctamente. -DskipTests se usa aquí por simplicidad, pero en un
+        # proyecto real, aquí ejecutarías tus pruebas de unidad e integración.
+        run: mvn -B clean package -DskipTests -Pproduction
 ```
+
+---
+<h3 id="multitenancy-vaadin">🔹 Parte 5 – Arquitectura Multitenancy y Despliegue Avanzado</h3>
+
+> - 🏁 **Punto de partida:** Rama `parte-4-cicd-github-actions`.
+> - 🎯 **Solución final:** Rama `parte-5-multitenancy-vaadin`.
+
+En esta sección, abordamos el desafío de la arquitectura **multitenancy**, un pilar en las aplicaciones SaaS (Software
+as a Service). El objetivo es que una única instancia de nuestra aplicación pueda servir a múltiples clientes (tenants),
+manteniendo sus datos seguros y aislados.
+
+#### Estrategias de Multitenancy
+
+Existen varios enfoques para lograr el aislamiento de datos, cada uno con sus pros y contras:
+
+1. **Base de Datos por Tenant:** Máximo aislamiento y seguridad. Cada cliente tiene su propia base de datos. Sin
+   embargo, es el enfoque más costoso y complejo de gestionar y escalar.
+2. **Esquema por Tenant:** Un punto intermedio. Todos los clientes comparten la misma base de datos, pero cada uno tiene
+   su propio conjunto de tablas (esquema). Buen aislamiento con menor coste que el anterior.
+3. **Base de Datos Compartida con Columna Discriminadora:** El enfoque más simple y rápido. Todos los datos de todos los
+   clientes conviven en las mismas tablas, y una columna especial (ej. `tenant_id`) "discrimina" a qué cliente pertenece
+   cada fila.
+
+Para este taller, nos enfocaremos en la **Columna Discriminadora**. Es una solución muy eficiente y se integra de
+maravilla con frameworks como Hibernate y Vaadin.
+
+#### El Rol de Vaadin y Hibernate
+
+- **Vaadin:** Al ser un framework de UI stateful, Vaadin mantiene una sesión de usuario (`VaadinSession`) en el
+  servidor. Esto nos proporciona un lugar perfecto y seguro para almacenar la información del tenant activo una vez que
+  el usuario ha iniciado sesión.
+- **Hibernate:** A partir de la versión 6, Hibernate ofrece soporte de primera clase para este enfoque a través de la
+  anotación `@TenantId`. Automáticamente, y de forma transparente, añadirá una cláusula `WHERE tenant_id = ?` a cada
+  consulta SQL, garantizando que un usuario solo pueda ver y modificar sus propios datos.
+
+#### Componentes Clave de la Implementación
+
+##### 1. Añadir el Identificador de Tenant a las Entidades
+
+El primer paso es modificar nuestras entidades para que incluyan la columna discriminadora. En la entidad `Person`,
+añadimos un campo `tenantId` y lo anotamos con `@TenantId`.
+
+```java
+
+@Entity
+@Table(name = "person")
+public class Person implements Serializable {
+
+    // ESTRUCTURA ANTERIOR
+
+    @TenantId
+    private Long tenantId;
+}
+```
+
+También creamos una entidad `Tenant` para gestionar nuestros clientes.
+
+```java
+
+@Entity
+@Table(name = "tenant")
+public class Tenant implements Serializable {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long tenantId;
+
+    @NotNull
+    @Size(min = 1, max = 100)
+    @Column(unique = true, updatable = false)
+    private String tenantName;
+
+}
+```
+
+#### 2. Crear el Resolvedor de Tenant
+
+Necesitamos un componente que le diga a Hibernate cuál es el ID del tenant "activo" en cada momento. Para esto,
+implementamos `CurrentTenantIdentifierResolver`.
+
+Nuestra implementación utiliza `VaadinSession.getCurrent()` para obtener el objeto `Tenant` que guardamos durante el
+login del usuario.
+
+```java
+
+@Component
+public class CurrentTenantIdentifierResolverImpl implements CurrentTenantIdentifierResolver<Long>, HibernatePropertiesCustomizer {
+
+    private static final long DEFAULT_TENANT = 0L;
+
+    @Override
+    public Long resolveCurrentTenantIdentifier() {
+        if (VaadinSession.getCurrent() != null) {
+            Tenant tenant = VaadinSession.getCurrent().getAttribute(Tenant.class);
+            return tenant != null && tenant.getTenantId() != null ? tenant.getTenantId() : DEFAULT_TENANT;
+        }
+        return DEFAULT_TENANT;
+    }
+
+
+    @Override
+    public boolean validateExistingCurrentSessions() {
+        return true;
+    }
+
+    @Override
+    public void customize(Map<String, Object> hibernateProperties) {
+        hibernateProperties.put(MultiTenancySettings.MULTI_TENANT_IDENTIFIER_RESOLVER, this);
+    }
+}
+```
+
+##### 3. Configurar Spring Boot
+
+Finalmente, ajustamos nuestro `application.yml` para que Spring Boot active el mecanismo de Hibernate.
+
+```yml
+spring:
+  jpa:
+    hibernate:
+      multiTenancy: NONE
+      tenant_identifier_resolver: dev.fredpena.dcm.tenancy.CurrentTenantIdentifierResolverImpl
+```
+
+##### 4. Actualizar las Migraciones de Flyway
+
+Por supuesto, necesitamos una migración de Flyway para crear la tabla `tenant` y añadir la columna `tenant_id` a la
+tabla `person`.
+
+```sql
+-- V0.0.1__create_person_table.sql
+CREATE TABLE tenant
+(
+    tenant_id   BIGSERIAL           NOT NULL,
+    tenant_name varchar(100) UNIQUE NOT NULL,
+    CONSTRAINT tenant_pkey PRIMARY KEY (tenant_id)
+);
+CREATE INDEX idxdcxf3ksi0gyn1tieeq0id96lm ON tenant USING btree (tenant_name);
+
+CREATE TABLE person
+(
+    id         BIGSERIAL           NOT NULL,
+    tenant_id  int8                NOT NULL,
+    first_name VARCHAR(100)        NOT NULL,
+    last_name  VARCHAR(100)        NOT NULL,
+    email      VARCHAR(255) UNIQUE NOT NULL,
+
+    CONSTRAINT person_pkey PRIMARY KEY (id)
+);
+```
+
+```sql
+-- R__insert_dev_data.sql
+DELETE
+FROM tenant;
+
+
+insert into tenant(tenant_id, tenant_name)
+values (1, 'Tenant 1'),
+       (2, 'Tenant 2'),
+       (3, 'Tenant 3');
+
+SELECT SETVAL('tenant_tenant_id_seq', (SELECT MAX(tenant_id) FROM tenant) + 1, false);
+
+DELETE
+FROM person;
+
+
+insert into person(tenant_id, first_name, last_name, email, address, phone_number, birth_date)
+values (1, 'jigrormo', 'Lane', 'eula.lane@jigrormo.ye', '1395 Jigror Park', '(762) 526-5961', '1955-12-07'),
+       (2, 'zun', 'Rodriquez', 'barry.rodriquez@zun.mm', '216 Zunnij Grove', '(267) 955-5124', '2014-12-07'),
+       (3, 'capfad', 'Selvi', 'eugenia.selvi@capfad.vn', '1016 Capfad View', '(680) 368-2192', '1974-11-22'),
+       (1, 'dec', 'Miles', 'alejandro.miles@dec.bn', '214 Decde River', '(281) 301-2039', '2015-01-09'),
+       (1, 'bivo', 'Tesi', 'cora.tesi@bivo.yt', '1050 Bivo Way', '(600) 616-7955', '1973-03-08'),
+       (2, 'judbilo', 'Ishii', 'marguerite.ishii@judbilo.gn', '1734 Judbi Grove', '(882) 813-1374', '1938-12-04'),
+       (3, 'joraf', 'Jacobs', 'mildred.jacobs@joraf.wf', '1143 Joraf Way', '(642) 665-1763', '1968-07-08'),
+       (1, 'kem', 'Goodman', 'gene.goodman@kem.tl', '287 Kemdol Street', '(383) 458-2132', '2011-05-19'),
+       (1, 'odeter', 'Bennett', 'lettie.bennett@odeter.bb', '1302 Odeter Circle', '(769) 335-6771', '1960-07-23'),
+       (1, 'lisohuje', 'Leach', 'mabel.leach@lisohuje.vi', '1563 Lisoh Square', '(803) 586-8035', '1947-06-30'),
+       (2, 'duod', 'Miccinesi', 'jordan.miccinesi@duod.gy', '842 Duod Lane', '(531) 919-2280', '1983-08-11'),
+       (2, 'nowufpus', 'Parkes', 'marie.parkes@nowufpus.ph', '1624 Nowuf Plaza', '(814) 667-8937', '1944-06-11'),
+       (3, 'kagu', 'Gray', 'rose.gray@kagu.hr', '1325 Kagu Loop', '(713) 311-8766', '1959-06-11'),
+       (3, 'fef', 'Stokes', 'garrett.stokes@fef.bg', '310 Feffo Grove', '(381) 421-2371', '2010-03-22'),
+       (1, 'derwogi', 'Matthieu', 'barbara.matthieu@derwogi.jm', '1888 Derwo Park', '(940) 463-7299', '1931-03-18'),
+       (1, 'wehovuce', 'Rhodes', 'jean.rhodes@wehovuce.gu', '1500 Wehovu Boulevard', '(777) 435-9570', '1950-08-25'),
+       (1, 'zamum', 'Romoli', 'jack.romoli@zamum.bw', '984 Zamum Drive', '(517) 393-9630', '1976-06-20'),
+       (2, 'dunebuh', 'Holden', 'pearl.holden@dunebuh.cr', '1497 Dune Parkway', '(711) 904-3669', '1950-10-16'),
+       (2, 'repiwid', 'Montero', 'belle.montero@repiwid.si', '1836 Repi Terrace', '(935) 404-4792', '1933-11-08'),
+       (3, 'razuppa', 'Molina', 'olive.molina@razuppa.ga', '1805 Razup Extension', '(935) 267-8492', '1935-05-21');
+```
+
+---
+
+### 🚀 Flujo de Desarrollo Avanzado con Docker Compose
+
+Para facilitar el desarrollo y simular entornos de producción con múltiples réplicas, hemos adoptado un flujo de trabajo
+basado en Docker Compose. Esto nos permite levantar toda la pila de la aplicación (base de datos y aplicación) con un
+solo comando y demostrar conceptos clave.
+
+#### 1. Dockerfile Optimizado (Multi-Stage Build)
+
+Para crear imágenes de nuestra aplicación de forma eficiente, usamos un `Dockerfile` con múltiples etapas. Esto produce
+una imagen final ligera, optimizada para producción, y acelera las compilaciones posteriores.
+
+```dockerfile
+FROM eclipse-temurin:21-jre
+COPY target/database-change-management-java.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "/app.jar"]
+
+```
+
+#### 2. Demostración Práctica: ¿Por qué Desacoplar las Migraciones?
+
+Hemos creado dos escenarios para visualizar la importancia de ejecutar las migraciones de forma centralizada y no en
+cada arranque de la aplicación.
+
+### Escenario A: El Modo Problemático (Migración en cada Réplica)
+
+En este escenario, cada instancia de la aplicación intenta ejecutar la migración, causando una "condición de carrera" (
+race condition).
+
+- **Archivo**: `docker-compose-replicas-bad.yml`
+
+```yml
+# docker-compose-replicas-bad.yml
+
+services:
+  postgres_workshop:
+    image: postgres:15
+    container_name: postgres_workshop_bad
+    volumes:
+      - db_postgres_bad:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=workshop_db
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    depends_on:
+      postgres_workshop:
+        condition: service_healthy
+    ports:
+      # No especificamos el puerto del host (ej. "8080:8080")
+      # para que Docker asigne puertos aleatorios a cada réplica sin conflictos.
+      - "8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres_workshop:5432/workshop_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - vaadin.productionMode=true
+
+volumes:
+  db_postgres_bad:
+```
+
+- **Configuración clave**: La aplicación arranca con `spring.flyway.enabled=true`.
+
+```yml
+spring:
+  config:
+    activate:
+      on-profile: dev
+  flyway:
+    enabled: true
+```
+
+- **Ejecución**
+
+```shell
+./mvnw dependency:go-offline -Pproduction   
+```
+
+```shell
+./mvnw clean package -DskipTests -Pproduction   
+```
+
+```shell
+docker compose -f docker-compose-replicas-bad.yml up --build --scale app=3    
+```
+
+- **Análisis de los Logs**: Se puede ver claramente una "condición de carrera". La instancia `app-2` gana, realiza todo
+  el trabajo de migración, mientras que `app-1` y `app-3` esperan y luego solo confirman que el trabajo ya está hecho.
+
+> PD: No siempre tiene que ser en ese orden, los `logs` mostrado a continuación son un ejemplo y pueden variar.
+
+# --- La instancia app-2 "gana" la carrera y empieza a migrar ---
+
+```text
+app-2 | o.f.c.i.s.JdbcTableSchemaHistory : Creating Schema History table "public"."flyway_schema_history" ...
+
+app-2 | o.f.core.internal.command.DbMigrate      : Current version of schema "public": << Empty Schema >>
+
+app-2 | o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "0.0.1 - create person table"
+
+app-2 | o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "0.0.2 - add fields to person"
+
+```
+
+# ... (más migraciones) ...
+
+```text
+app-2 | o.f.core.internal.command.DbMigrate      : Successfully applied 5 migrations to schema "public", now at version v0.0.4
+```
+
+# --- Mientras tanto, app-1 y app-3 esperan y luego hacen un chequeo redundante ---
+
+```text
+app-1 | o.f.core.internal.command.DbMigrate      : Current version of schema "public": 0.0.4
+
+app-1 | o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+
+app-3 | o.f.core.internal.command.DbMigrate      : Current version of schema "public": 0.0.4
+
+app-3 | o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+
+```
+
+# --- Finalmente, todas las aplicaciones terminan de arrancar, pero el proceso ha sido desordenado y más lento ---
+
+```text
+app-2 | .DatabaseChangeManagementJavaApplication : Started DatabaseChangeManagementJavaApplication in 8.041 seconds
+
+app-1 | .DatabaseChangeManagementJavaApplication : Started DatabaseChangeManagementJavaApplication in 6.111 seconds
+
+app-3 | .DatabaseChangeManagementJavaApplication : Started DatabaseChangeManagementJavaApplication in 6.022 seconds
+```
+
+**Conclusión**: El arranque es caótico. Una instancia hace el trabajo mientras las otras esperan, realizando
+validaciones innecesarias que ralentizan el despliegue general.
+
+### Escenario B: El Modo Correcto (Migración Única y Centralizada)
+
+Aquí, un servicio dedicado de Flyway ejecuta la migración una sola vez. Las réplicas de la aplicación arrancan después,
+encontrando la base de datos ya lista.
+
+- **Archivo**: `docker-compose-replicas-good.yml`
+
+```yaml
+services:
+  postgres_workshop:
+    image: postgres:15
+    volumes:
+      - db_postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=workshop_db
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  flyway:
+    image: flyway/flyway:11.10.2 # Usa la imagen oficial de Flyway
+    command: >           # Ejecuta el comando 'migrate'
+      -url=jdbc:postgresql://postgres_workshop:5432/workshop_db
+      -user=postgres
+      -password=postgres
+      -locations=filesystem:/flyway/sql
+      migrate
+    volumes:
+      - ./src/main/resources/db/migration:/flyway/sql # Monta los scripts SQL en el contenedor
+    depends_on:
+      # Ahora depende de que el servicio esté "saludable", no solo iniciado.
+      postgres_workshop:
+        condition: service_healthy
+
+  app:
+    build: .
+    depends_on:
+      flyway:
+        condition: service_completed_successfully
+    ports:
+      # No especificamos el puerto del host (ej. "8080:8080")
+      # para que Docker asigne puertos aleatorios a cada réplica sin conflictos.
+      - "8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres_workshop:5432/workshop_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - vaadin.productionMode=true
+
+volumes:
+  db_postgres:
+```
+
+- **Configuración clave**: La aplicación arranca con `spring.flyway.enabled=false`.
+
+```yml
+spring:
+  config:
+    activate:
+      on-profile: dev
+  flyway:
+    enabled: false
+```
+
+- **Ejecución**
+
+```shell
+./mvnw dependency:go-offline -Pproduction   
+```
+
+```shell
+./mvnw clean package -DskipTests -Pproduction   
+```
+
+```shell
+docker compose -f docker-compose-replicas-good.yml up --build --scale app=3    
+```
+
+- **Análisis de los Logs:** El flujo es perfectamente secuencial y limpio. El contenedor de `Flyway` hace su trabajo y
+  se apaga. Solo entonces, las tres réplicas de la aplicación arrancan simultáneamente en un entorno ya preparado.
+
+# --- 1. El contenedor 'flyway-1' arranca y realiza la migración de forma aislada ---
+
+```text
+flyway-1 | Flyway OSS Edition 11.10.2 by Redgate
+
+flyway-1 | Creating Schema History table "public"."flyway_schema_history" ...
+
+flyway-1 | Migrating schema "public" to version "0.0.1 - create person table"
+
+flyway-1 | Migrating schema "public" to version "0.0.2 - add fields to person"
+```
+
+# ... (más migraciones) ...
+
+```text
+flyway-1 | Successfully applied 5 migrations to schema "public", now at version v0.0.4
+```
+
+# --- 2. El contenedor de migración termina su trabajo y se apaga con éxito ---
+
+```text
+flyway-1 exited with code 0
+```
+
+# --- 3. SOLO DESPUÉS, las tres réplicas de la aplicación arrancan simultáneamente ---
+
+```text
+app-1 | .DatabaseChangeManagementJavaApplication : Starting DatabaseChangeManagementJavaApplication...
+
+app-3 | .DatabaseChangeManagementJavaApplication : Starting DatabaseChangeManagementJavaApplication...
+
+app-2 | .DatabaseChangeManagementJavaApplication : Starting DatabaseChangeManagementJavaApplication...
+```
+
+# --- 4. Las aplicaciones arrancan limpiamente, sin ejecutar lógicas de migración ---.
+
+```text
+app-1 | o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+
+app-3 | o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+
+app-2 | o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+```
+
+# --- El resultado es un arranque mucho más rápido y predecible ---
+
+```text
+app-1 | .DatabaseChangeManagementJavaApplication : Started DatabaseChangeManagementJavaApplication in 5.212 seconds
+
+app-3 | .DatabaseChangeManagementJavaApplication : Started DatabaseChangeManagementJavaApplication in 5.233 seconds
+
+app-2 | .DatabaseChangeManagementJavaApplication : Started DatabaseChangeManagementJavaApplication in 5.256 seconds
+```
+
+**Conclusión**: El proceso es ordenado y eficiente. La migración se trata como un paso de despliegue atómico,
+y las aplicaciones arrancan en un estado conocido, lo que es más rápido, seguro y escalable.
+
+> ⚠️ **Importante:**Esta demostración práctica es oro puro para entender por qué la estrategia de migración separada es
+> el estándar de la industria.

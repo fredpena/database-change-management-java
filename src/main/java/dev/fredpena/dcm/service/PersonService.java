@@ -4,10 +4,13 @@ import dev.fredpena.dcm.data.Person;
 import dev.fredpena.dcm.data.PersonRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author me@fredpena.dev
@@ -17,21 +20,25 @@ import java.util.List;
 @RequiredArgsConstructor // Inyección de dependencias vía constructor con Lombok
 public class PersonService {
 
-    private final PersonRepository personRepository;
+    private final PersonRepository repository;
+
+    public Optional<Person> get(Long id) {
+        return repository.findById(id);
+    }
 
     @Transactional(readOnly = true)
     public List<Person> findAll() {
-        return personRepository.findAll();
+        return repository.findAll();
     }
 
     @Transactional
-    public Person create(Person person) {
-        return personRepository.save(person);
+    public Person save(Person person) {
+        return repository.save(person);
     }
 
     @Transactional
     public Person update(Long id, Person personDetails) {
-        Person existingPerson = personRepository.findById(id)
+        Person existingPerson = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Person not found with id: " + id));
 
         existingPerson.setFirstName(personDetails.getFirstName());
@@ -41,6 +48,10 @@ public class PersonService {
         existingPerson.setBirthDate(personDetails.getBirthDate());
         // El email no se actualiza por diseño (@Column(updatable = false))
 
-        return personRepository.save(existingPerson);
+        return repository.save(existingPerson);
+    }
+
+    public Page<Person> list(Pageable pageable) {
+        return repository.findAll(pageable);
     }
 }

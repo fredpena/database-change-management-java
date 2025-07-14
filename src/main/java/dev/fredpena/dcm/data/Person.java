@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.TenantId;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -46,4 +47,7 @@ public class Person implements Serializable {
     private String phoneNumber;
 
     private LocalDate birthDate;
+
+    @TenantId
+    private Long tenantId;
 }

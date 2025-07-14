@@ -4,7 +4,7 @@
 CREATE TABLE department
 (
     id   BIGSERIAL PRIMARY KEY,
-    name VARCHARR(100) NOT NULL -- ¡ERROR! 'VARCHARR' no es un tipo de dato válido.
+    name VARCHAR(100) NOT NULL -- ¡ERROR! 'VARCHARR' no es un tipo de dato válido.
 );
 
 -- También añadimos una columna a la tabla 'person' para la clave foránea.

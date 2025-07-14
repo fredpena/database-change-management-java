@@ -9,6 +9,26 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=workshop_db
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  flyway:
+    image: flyway/flyway:11.10.2 # Usa la imagen oficial de Flyway
+    command: >           # Ejecuta el comando 'migrate'
+      -url=jdbc:postgresql://postgres_workshop:5432/workshop_db
+      -user=postgres
+      -password=postgres
+      -locations=filesystem:/flyway/sql
+      migrate
+    volumes:
+      - ./src/main/resources/db/migration:/flyway/sql # Monta los scripts SQL en el contenedor
+    depends_on:
+      # Ahora depende de que el servicio esté "saludable", no solo iniciado.
+      postgres_workshop:
+        condition: service_healthy
 
 volumes:
   db_postgres:

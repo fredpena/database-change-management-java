@@ -1,14 +1,37 @@
 # ===================================================================
 # CONFIGURACIÓN BASE (APLICA A TODOS LOS PERFILES)
 # ===================================================================
+logging:
+  level:
+    org:
+      atmosphere: warn
+
+vaadin:
+  allowed-packages: com.vaadin,org.vaadin,com.flowingcode,dev.fredpena
+  # Launch the default browser when starting the application in development mode
+  launch-browser: true
+  pnpm:
+    enable: true
+
 spring:
   application:
     # Nombre de la aplicación. Útil para logging y gestión.
     name: database-change-management-java
 
+  mustache:
+    check-template-location: false
+
+  jpa:
+    hibernate:
+      multiTenancy: NONE
+      tenant_identifier_resolver: dev.fredpena.dcm.tenancy.CurrentTenantIdentifierResolverImpl
+
   flyway:
     # Habilita la ejecución de migraciones de Flyway al arrancar la aplicación.
-    enabled: true
+    #    enabled: true
+    # ¡CRUCIAL! Deshabilitamos la ejecución automática de Flyway.
+    # La migración se gestionará como un paso separado en el pipeline de CI/CD.
+    enabled: false
     # Si la tabla de historial de Flyway no existe, crea una línea base en lugar de fallar.
     # Esencial para aplicar Flyway a una base de datos ya existente.
     baseline-on-migrate: true
@@ -42,7 +65,10 @@ spring:
       on-profile: dev
   flyway:
     # Aunque ya está habilitado en la base, es una buena práctica ser explícito.
-    enabled: true
+    #    enabled: true
+    # ¡CRUCIAL! Deshabilitamos la ejecución automática de Flyway.
+    # La migración se gestionará como un paso separado en el pipeline de CI/CD.
+    enabled: false
     # IMPORTANTE: Sobrescribe las ubicaciones de la configuración base.
     # En 'dev', Flyway buscará tanto en 'prod' como en 'dev'.
     # Esto permite tener migraciones base para todos los entornos (prod)
@@ -52,7 +78,7 @@ spring:
     hibernate:
       # Controla cómo Hibernate interactúa con el esquema de la base de datos.
       # 'none': No hace nada. Hibernate no interactúa con el esquema de la base de datos.
-                # Es la opción más segura cuando Flyway gestiona el esquema.
+      # Es la opción más segura cuando Flyway gestiona el esquema.
       # 'validate': Verifica que la estructura de la base de datos coincida con las entidades (clases).
       # 'update': Actualiza el esquema de base de datos para que coincida con las entidades (agrega, no elimina).
       # 'create': Elimina y crea desde cero el esquema de base de datos cada vez que se inicia la app.
