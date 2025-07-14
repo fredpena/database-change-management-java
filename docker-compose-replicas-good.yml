@@ -1,4 +1,16 @@
 services:
+  traefik:
+    image: "traefik:v3.4"
+    command:
+      - "--api.insecure=true"                # Panel de control
+      - "--providers.docker=true"            # Descubre los contenedores automáticamente
+      - "--entrypoints.web.address=:80"      # Expone el puerto 80
+    ports:
+      - "80:80"
+      - "8080:8080"                          # Dashboard de Traefik
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
   postgres_workshop:
     image: postgres:15
     volumes:
@@ -35,9 +47,13 @@ services:
     depends_on:
       flyway:
         condition: service_completed_successfully
-    ports:
-      # No especificamos el puerto del host (ej. "8080:8080")
-      # para que Docker asigne puertos aleatorios a cada réplica sin conflictos.
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.app.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.app.entrypoints=web"
+      - "traefik.http.services.app.loadbalancer.server.port=8080"
+      - "traefik.http.services.app.loadbalancer.sticky.cookie=true"
+    expose:
       - "8080"
     environment:
       - SPRING_PROFILES_ACTIVE=dev

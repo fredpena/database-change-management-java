@@ -12,6 +12,13 @@ vaadin:
   launch-browser: true
   pnpm:
     enable: true
+  url-mapping: /*
+
+server:
+  forward-headers-strategy: framework
+#  use-forward-headers: true # Si estás usando HTTPS/TLS en algún momento (opcional con Traefik)
+
+
 
 spring:
   application:
