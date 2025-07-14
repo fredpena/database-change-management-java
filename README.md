@@ -8,21 +8,30 @@ usando **Flyway**, **Spring Boot**, **GitHub Actions** y un enfoque final aplica
 
 ## 🎯 Objetivos del Taller
 
-- Entender los conceptos clave de Database Change Management (DCM).
-- Aprender a usar Flyway para versionar esquemas y aplicar migraciones.
-- Implementar estrategias de rollback.
-- Automatizar el despliegue con GitHub Actions.
-- Diseñar un enfoque multitenancy para migraciones dinámicas por cliente.
+- **Dominar los fundamentos** de Database Change Management (DCM) y las mejores prácticas de Flyway.
+- **Implementar un ciclo de vida completo de migraciones** en una aplicación Spring Boot, incluyendo scripts
+  versionados (`V`) y repetibles (`R`).
+- **Gestionar y recuperarse de errores** en migraciones, entendiendo el control de checksums y las estrategias de
+  rollback.
+- **Automatizar el proceso de CI/CD** con GitHub Actions para asegurar la calidad y la consistencia del código y las
+  migraciones.
+- **Diseñar e implementar una arquitectura multitenancy** real usando el enfoque de columna discriminadora con Hibernate
+  y Vaadin.
+- **Simular y analizar entornos de despliegue complejos** con Docker Compose para demostrar visualmente la importancia
+  de desacoplar las migraciones.
 
 ---
 
 ## 🌿 Ramas del taller
 
-1. `main`: proyecto base con estructura mínima (README, .gitignore, etc.).
-2. `parte-2-springboot-flyway`: configuración inicial y primeras migraciones.
-3. `parte-3-rollbacks-validaciones`: simulación de errores y control de checksum.
-4. `parte-4-cicd-github-actions`: integración de pipeline.
-5. `parte-5-multitenancy-vaadin`: configuración multitenancy con Flyway dinámico.
+1. `main`: Proyecto base con estructura mínima (README, .gitignore, etc.).
+2. `parte-2-springboot-flyway`: Configuración inicial de Spring Boot + Flyway y creación de las primeras migraciones de
+   esquema (`V`) y datos de prueba (`R`).
+3. `parte-3-rollbacks-validaciones`: Simulación de errores, gestión de migraciones fallidas y estrategias de rollback.
+4. `parte-4-cicd-github-actions`: Creación de un pipeline de Integración Continua (CI) con GitHub Actions para compilar
+   y validar el proyecto.
+5. `parte-5-multitenancy-vaadin`: Implementación de arquitectura multitenancy (columna discriminadora) y demostración de
+   estrategias de despliegue con Docker Compose.
 
 🗂️ **Cómo navegar entre las distintas partes del taller**
 
@@ -65,6 +74,8 @@ Si solo quieres ver los cambios entre partes, puedes usar:
 git diff parte-2-springboot-flyway parte-3-rollbacks-validaciones
 ```
 
+---
+
 ## 🧰 Requisitos Técnicos Previos
 
 ### 📦 Herramientas que necesitas instalar antes del taller:
@@ -82,43 +93,33 @@ git diff parte-2-springboot-flyway parte-3-rollbacks-validaciones
 
 ### 🔹 Parte 1 – Fundamentos de Database Change Management
 
-- Enfoques: state-based vs migration-based
-
-- Herramientas: Flyway vs Liquibase
-
-- Casos de uso y buenas prácticas
+- Enfoques: state-based vs migration-based.
+- Herramientas: Flyway vs Liquibase.
+- Casos de uso y buenas prácticas.
 
 ### 🔹 [Parte 2 – Proyecto Spring Boot + Flyway](#spring-flyway)
 
-- Configuración inicial
-
-- Primeras migraciones de esquema y datos
-
-- Migraciones versionadas y repetibles
+- Configuración inicial del proyecto.
+- Creación de migraciones versionadas (`V`) para el esquema.
+- Uso de perfiles de Spring para gestionar migraciones repetibles (`R`) con datos de prueba.
 
 ### 🔹 Parte 3 – Rollbacks y validaciones
 
-- Simulación de errores
-
-- Scripts de reversión manuales
-
-- Control de checksum
+- Simulación de migraciones fallidas y análisis del comportamiento transaccional.
+- Recuperación de errores con `flyway:repair`.
+- Control de checksums y estrategias de rollback (simulado vs. `undo`).
 
 ### 🔹 Parte 4 – CI/CD con GitHub Actions
 
-- Automatización del build y migraciones
+- Creación de un pipeline de Integración Continua.
+- Automatización del build y validación del proyecto en cada `push`.
 
-- Ejecución del pipeline y despliegue simulado
+### 🔹 Parte 5 – Arquitectura Multitenancy y Despliegue Avanzado
 
-### 🔹 Parte 5 – Migraciones en entornos Multitenancy
-
-- Enfoque base de datos por cliente
-
-- Flyway dinámico según tenant seleccionado
-
-- Integración con Vaadin Flow
-
----
+- Análisis de estrategias de multitenancy (énfasis en columna discriminadora).
+- Integración con Hibernate `@TenantId` y `VaadinSession`.
+- Simulación de despliegues con réplicas usando Docker Compose para demostrar patrones de migración seguros vs.
+  inseguros.
 
 ---
 
@@ -301,6 +302,8 @@ Si tiene **Maven** instalado globalmente, puede reemplazar `./mvnw` with `mvn`.
 * Observa los **logs** de Flyway en la consola para confirmar que la migración se aplicó correctamente.
 * (Opcional) Conéctate a la base de datos y verifica que las tablas `person` y `flyway_schema_history` han sido creadas.
 
+---
+
 ### 🔹 Parte 2 (Continuación) – Evolucionando el Esquema
 
 Una vez que tenemos nuestra estructura base, el siguiente paso natural es modificarla. Añadiremos nuevos campos a
@@ -375,6 +378,8 @@ public class Person implements Serializable {
   datos que ya existan.
 - Registrará la versión` 0.0.2` en la tabla de historial, marcándola como completada y dejándolo todo listo para la
   siguiente migración.
+
+---
 
 ### 🔹 Parte 2 (Continuación) – Migraciones solo para Desarrollo
 
@@ -524,6 +529,8 @@ spring:
     # Muestra en la consola el SQL generado por Hibernate. Útil para depuración.
     show-sql: false
 ```
+
+---
 
 ### 🔹 Parte 2 (Continuación) – Creando un Endpoint Básico
 
