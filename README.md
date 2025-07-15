@@ -297,7 +297,7 @@ public class Person implements Serializable {
 ./mvnw.cmd spring-boot:run
 ```
 
-Si tiene **Maven** instalado globalmente, puede reemplazar `./mvnw` with `mvn`.
+Si tiene **Maven** instalado globalmente, puede reemplazar `./mvnw` con `mvn`.
 
 * Observa los **logs** de Flyway en la consola para confirmar que la migración se aplicó correctamente.
 * (Opcional) Conéctate a la base de datos y verifica que las tablas `person` y `flyway_schema_history` han sido creadas.
@@ -537,20 +537,85 @@ spring:
 Para finalizar esta parte y poder interactuar con nuestros datos, crearemos un endpoint REST básico que nos permita
 listar, crear y actualizar personas.
 
-#### 1. Crear el Repositorio (`PersonRepository`):
+1. **Crear el Repositorio (`PersonRepository`):**
+    - Esta interfaz extiende `JpaRepository`, y Spring Data JPA nos proporcionará automáticamente los métodos CRUD (
+      `save`, `findById`, `findAll`, etc.).
 
-- Esta interfaz extiende `JpaRepository`, y Spring Data JPA nos proporcionará automáticamente los métodos CRUD (`save`,
-  `findById`, `findAll`, etc.).
+```java
+public interface PersonRepository extends JpaRepository<Person, Long> {
+}
+```
 
-#### 2. Crear la Capa de Servicio (`PersonService`):
+2. **Crear la Capa de Servicio (`PersonService`):**
+    - Es una buena práctica encapsular la lógica de negocio aquí. Nuestro servicio usará el `PersonRepository` para
+      interactuar con la base de datos.
 
-- Es una buena práctica encapsular la lógica de negocio aquí. Nuestro servicio usará el `PersonRepository` para
-  interactuar con la base de datos.
+```java
 
-#### 3. Crear el Controlador REST (`PersonController`):
+@Service
+@RequiredArgsConstructor // Inyección de dependencias vía constructor con Lombok
+public class PersonService {
 
-- Esta clase, anotada con `@RestController`, define las URL públicas de nuestra API y mapea las solicitudes HTTP a los
-  métodos del servicio.
+    private final PersonRepository personRepository;
+
+    @Transactional(readOnly = true)
+    public List<Person> findAll() {
+        return personRepository.findAll();
+    }
+
+    @Transactional
+    public Person create(Person person) {
+        return personRepository.save(person);
+    }
+
+    @Transactional
+    public Person update(Long id, Person personDetails) {
+        Person existingPerson = personRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Person not found with id: " + id));
+
+        existingPerson.setFirstName(personDetails.getFirstName());
+        existingPerson.setLastName(personDetails.getLastName());
+        existingPerson.setAddress(personDetails.getAddress());
+        existingPerson.setPhoneNumber(personDetails.getPhoneNumber());
+        existingPerson.setBirthDate(personDetails.getBirthDate());
+        // El email no se actualiza por diseño (@Column(updatable = false))
+
+        return personRepository.save(existingPerson);
+    }
+}
+```
+
+3. **Crear el Controlador REST (`PersonController`):**
+    - Esta clase, anotada con `@RestController`, define las URL públicas de nuestra API y mapea las solicitudes HTTP a
+      los métodos del servicio.
+
+```java
+
+@RestController
+@RequestMapping("/api/persons") // Ruta base para todos los endpoints de este controlador
+@RequiredArgsConstructor
+public class PersonController {
+
+    private final PersonService personService;
+
+    @GetMapping
+    public List<Person> getAllPersons() {
+        return personService.findAll();
+    }
+
+    @PostMapping
+    public ResponseEntity<Person> createPerson(@Valid @RequestBody Person person) {
+        Person createdPerson = personService.create(person);
+        return new ResponseEntity<>(createdPerson, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Person> updatePerson(@PathVariable Long id, @RequestBody Person personDetails) {
+        Person updatedPerson = personService.update(id, personDetails);
+        return ResponseEntity.ok(updatedPerson);
+    }
+}
+```
 
 #### 4. Probar los Endpoints:
 
