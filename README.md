@@ -539,8 +539,8 @@ listar, crear y actualizar personas.
 
 #### 1. **Crear el Repositorio (`PersonRepository`):**
 
-    - Esta interfaz extiende `JpaRepository`, y Spring Data JPA nos proporcionará automáticamente los métodos CRUD (
-      `save`, `findById`, `findAll`, etc.).
+- Esta interfaz extiende `JpaRepository`, y Spring Data JPA nos proporcionará automáticamente los métodos CRUD (
+  `save`, `findById`, `findAll`, etc.).
 
 ```java
 public interface PersonRepository extends JpaRepository<Person, Long> {
@@ -549,8 +549,8 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
 
 #### 2. **Crear la Capa de Servicio (`PersonService`):**
 
-    - Es una buena práctica encapsular la lógica de negocio aquí. Nuestro servicio usará el `PersonRepository` para
-      interactuar con la base de datos.
+- Es una buena práctica encapsular la lógica de negocio aquí. Nuestro servicio usará el `PersonRepository` para
+  interactuar con la base de datos.
 
 ```java
 
@@ -589,8 +589,8 @@ public class PersonService {
 
 #### 3. **Crear el Controlador REST (`PersonController`):**
 
-    - Esta clase, anotada con `@RestController`, define las URL públicas de nuestra API y mapea las solicitudes HTTP a
-      los métodos del servicio.
+- Esta clase, anotada con `@RestController`, define las URL públicas de nuestra API y mapea las solicitudes HTTP a
+  los métodos del servicio.
 
 ```java
 
