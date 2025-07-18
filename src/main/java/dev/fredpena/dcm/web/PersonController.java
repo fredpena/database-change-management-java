@@ -29,6 +29,7 @@ public class PersonController {
     @PostMapping
     public ResponseEntity<Person> createPerson(@Valid @RequestBody Person person) {
         Person createdPerson = personService.create(person);
+
         return new ResponseEntity<>(createdPerson, HttpStatus.CREATED);
     }
 

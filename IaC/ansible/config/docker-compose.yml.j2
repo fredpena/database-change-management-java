@@ -1,0 +1,76 @@
+services:
+  traefik:
+    image: "traefik:v3.4"
+    container_name: "traefik"
+    command:
+      #- "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.email=me@fredpena.dev"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - "./letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+  postgres_workshop:
+    image: postgres:15
+    volumes:
+      - db_postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=workshop_db
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  flyway:
+    image: flyway/flyway:11.10.2 # Usa la imagen oficial de Flyway
+    command: >           # Ejecuta el comando 'migrate'
+      -url=jdbc:postgresql://postgres_workshop:5432/workshop_db
+      -user=postgres
+      -password=postgres
+      -locations=filesystem:/flyway/sql
+      migrate
+    volumes:
+      - ./src/main/resources/db/migration:/flyway/sql # Monta los scripts SQL en el contenedor
+    depends_on:
+      # Ahora depende de que el servicio esté "saludable", no solo iniciado.
+      postgres_workshop:
+        condition: service_healthy
+
+  app:
+    image: fredpena/jconf205:latest
+    depends_on:
+      flyway:
+        condition: service_completed_successfully
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres_workshop:5432/workshop_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.fredpena.rule=Host(`app2.fredpena.dev`)"
+      - "traefik.http.routers.fredpena.service=fredpena-service"
+      - "traefik.http.routers.fredpena.entrypoints=websecure"
+      - "traefik.http.services.fredpena-service.loadbalancer.server.port=8444"
+      - "traefik.http.routers.fredpena.tls.certresolver=letsencrypt"
+
+volumes:
+  db_postgres:

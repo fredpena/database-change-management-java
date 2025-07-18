@@ -1,0 +1,8 @@
+name: pulumi-iac
+description: JConf2025
+runtime: java
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: java
+      jug: Jconf Dom 2025

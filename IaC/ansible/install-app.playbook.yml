@@ -1,0 +1,31 @@
+#!/usr/bin/env ansible-playbook
+---
+- hosts: app
+  tasks:
+    - name: Create required directory
+      file:
+        path: /usr/local/app
+        state: directory
+        mode: '0755'
+
+    - name: rendering app config
+      template:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+      with_items:
+        - src: config/docker-compose.yml.j2
+          dest: /usr/local/app/docker-compose.yml
+
+    - name: Pull images explicitly before compose up
+      shell: |
+        docker pull fredpena/jconf205:latest
+      become: true
+
+    - name: Run `docker compose up -d` again
+      command:
+        cmd: docker compose up -d
+        chdir: /usr/local/app
+      become: true
+
+    - debug:
+        var: output
